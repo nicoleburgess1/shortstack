@@ -30,12 +30,12 @@ const submit = async function (event) {
   
     let json = { assignmentToRemove: assignment }
     let body = JSON.stringify(json)
-    fetch('/remove', {
+    fetch('/delete', {
       method: 'DELETE',
       body
     }).then(response => response.json())
       .then(json => {
-        updateTable(json)
+        createTable(json)
       })
     return false;
   }
@@ -45,8 +45,8 @@ const submit = async function (event) {
     const table = document.querySelector("#homework-table")
     console.log(table)
     table.innerHTML = "<tr> <th>Course</th><th>Assignment</th><th>Due Date</th><th>Due Time</th><th>Days Left</th><th>Done?</th> </tr>"
-    jsonData.forEach(entry => {
-      table.innerHTML += `<tr> <td>${entry.course}</td> <td>${entry.assignment}</td> <td>${entry.dueDate}</td><td>${entry.dueTime}</td><td>${entry.daysLeft}</td><td><button onclick="removeRow(\'${entry.assignment}\')">done</button></td></tr>`
+    jsonData.forEach(assignment => {
+      table.innerHTML += `<tr> <td>${assignment.course}</td> <td>${assignment.assignment}</td> <td>${assignment.dueDate}</td><td>${assignment.dueTime}</td><td>${assignment.daysLeft}</td><td><button onclick="removeRow(\'${assignment.assignment}\')">done</button></td></tr>`
     })
   }
 
