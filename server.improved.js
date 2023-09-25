@@ -16,10 +16,13 @@ app.use(express.json())
 
 app.use(express.static("public") )
 app.use(express.json() )
+app.use(express.urlencoded({ extended: true }));
 
 const client = new MongoClient( uri )
 
 let collection = null
+let userCollection = null;
+let user = null;
 
 async function run() {
   await client.connect()
@@ -27,10 +30,11 @@ async function run() {
 
   // route to get all docs
   app.get("/docs", async (req, res) => {
-    if (collection !== null) {
+    if (collection !== null ) {
       const docs = await collection.find({}).toArray()
       res.json( docs )
     }
+    userCollection = await client.db("datatest").collection("userCollection");
   })
 }
 
@@ -67,6 +71,13 @@ app.post( '/update', async (req,res) => {
   res.json( result )
 })
 
+app.post('/login', async (req, res) => {
+  let username = req.body.username
+  let password = req.body.password
+  const userAlreadyCreated = await userCollection.findOne({ user: user });
+
+})
+
 app.listen(3000)
 
 
@@ -91,7 +102,7 @@ let appdata = [
   },
 ]
 
-const server = http.createServer(function (request, response) {
+/* const server = http.createServer(function (request, response) {
   if (request.method === 'GET') {
     handleGet(request, response)
   } else if (request.method === 'POST') {
@@ -113,7 +124,7 @@ const server = http.createServer(function (request, response) {
   else {
     sendFile(response, filename)
   }
-} */
+} 
 const handlePost = function (request, response) {
   console.log("request URL" + request.url);
   let dataString = ''
@@ -180,7 +191,4 @@ const calculateDaysLeft = function (dueDate){
     time= Math.floor(time / (1000 * 3600 * 24))+1 //days
     console.log(time)
     return time
-  }
-
-
-app.listen(process.env.PORT || port)
+  } */
