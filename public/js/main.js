@@ -28,16 +28,16 @@ const submit = async function (event) {
 
   const removeRow = async function (assignment) {
   
-    let json = { assignmentToRemove: assignment }
-    let body = JSON.stringify(json)
-    fetch('/remove', {
-      method: 'DELETE',
-      body
-    }).then(response => response.json())
-      .then(json => {
-        updateTable(json)
-      })
-    return false;
+    let json = { removeId: assignment };
+    let body = JSON.stringify(json);
+    const response = await fetch("/remove", {
+    method: "POST",
+    headers: { "Content-Type": "application/json" },
+    body: JSON.stringify({ _id: json.removeId }),
+  });
+  const data = await response.json();
+  //Display table of data
+  createTable(data);
   }
   
   

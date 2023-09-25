@@ -49,8 +49,16 @@ app.use( (req,res,next) => {
 })
 
 app.post( '/add', async (req,res) => {
-  const result = await collection.insertOne( req.body )
-  res.json( result )
+  let result = await collection.insertOne({
+    user: user,
+    assignment: req.body.assignment,
+  });
+
+  const userList = await collection.find({ user: user }).toArray();
+  userList.forEach((assignment) => {
+    console.log("add: " + JSON.stringify(Object.values(assignment)));
+  });
+  res.json(userList);
 })
 
 // assumes req.body takes form { _id:5d91fb30f3f81b282d7be0dd } etc.
@@ -58,7 +66,7 @@ app.post( '/remove', async (req,res) => {
   const result = await collection.deleteOne({ 
     _id:new ObjectId( req.body._id ) 
   })
-  
+  const userList = await collection.find({ user: user }).toArray();
   res.json( result )
 })
 
