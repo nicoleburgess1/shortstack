@@ -3,6 +3,83 @@ const http = require('http'),
   mime = require('mime'),
   dir = 'public/',
   port = 3000
+  const express = require('express')
+  const app = express(),
+    {MongoClient} =require('mongodb')
+
+   process.env.USER
+   process.env.PASS 
+  const uri = 'mongodb+srv://${process.env.USER}:${process.env.PASS}@cs4341a3.sqkz12t.mongodb.net/?retryWrites=true&w=majority';
+app.use(express.static('./'))
+app.use(express.json())
+
+
+app.use(express.static("public") )
+app.use(express.json() )
+
+const client = new MongoClient( uri )
+
+let collection = null
+
+async function run() {
+  await client.connect()
+  collection = await client.db("datatest").collection("test")
+
+  // route to get all docs
+  app.get("/docs", async (req, res) => {
+    if (collection !== null) {
+      const docs = await collection.find({}).toArray()
+      res.json( docs )
+    }
+  })
+}
+
+run()
+
+app.use( (req,res,next) => {
+  if( collection !== null ) {
+    next()
+  }else{
+    res.status( 503 ).send()
+  }
+})
+
+app.post( '/add', async (req,res) => {
+  const result = await collection.insertOne( req.body )
+  res.json( result )
+})
+
+// assumes req.body takes form { _id:5d91fb30f3f81b282d7be0dd } etc.
+app.post( '/remove', async (req,res) => {
+  const result = await collection.deleteOne({ 
+    _id:new ObjectId( req.body._id ) 
+  })
+  
+  res.json( result )
+})
+
+app.post( '/update', async (req,res) => {
+  const result = await collection.updateOne(
+    { _id: new ObjectId( req.body._id ) },
+    { $set:{ name:req.body.name } }
+  )
+
+  res.json( result )
+})
+
+app.listen(3000)
+
+
+
+
+
+
+
+
+
+
+
+
 
 let appdata = [
   {
@@ -24,7 +101,7 @@ const server = http.createServer(function (request, response) {
     handleDelete(request, response)
   }
 })
-const handleGet = function (request, response) {
+/* app.get('/', (request, response)) => {
   const filename = dir + request.url.slice(1)
   if (request.url === '/') {
     sendFile(response, 'public/index.html')
@@ -36,7 +113,7 @@ const handleGet = function (request, response) {
   else {
     sendFile(response, filename)
   }
-}
+} */
 const handlePost = function (request, response) {
   console.log("request URL" + request.url);
   let dataString = ''
@@ -106,4 +183,4 @@ const calculateDaysLeft = function (dueDate){
   }
 
 
-server.listen(process.env.PORT || port)
+app.listen(process.env.PORT || port)
